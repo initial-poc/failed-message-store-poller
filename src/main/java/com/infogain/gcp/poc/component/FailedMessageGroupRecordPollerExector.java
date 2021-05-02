@@ -14,18 +14,18 @@ import java.time.LocalTime;
 
 @Slf4j
 @RequiredArgsConstructor
-@RestController
+@Component
 public class FailedMessageGroupRecordPollerExector {
     private final MessageGroupRecordProcessorService messageGroupRecordProcessorService;
 
-    @GetMapping("/processMessageGroupFailedRecords")
+    @Scheduled(cron = "*/5 * * * * *")
     public void processFailedRecords() {
         log.info("Failed Record poller started at {}", LocalTime.now());
         messageGroupRecordProcessorService.processFailedRecords();
         log.info("Failed Record poller completed at {}", LocalTime.now());
     }
 
-    @GetMapping("/processMessageGroupStuckRecords")
+    @Scheduled(cron = "*/5 * * * * *")
     public void processStuckRecords() {
         log.info("Failed Record poller started at {}", LocalTime.now());
         messageGroupRecordProcessorService.processStuckRecords();
