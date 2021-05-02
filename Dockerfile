@@ -10,10 +10,10 @@ VOLUME /tmp
 EXPOSE 9002
 
 # application jar file when packaged
-ARG jar_file=target/outbox-poller.jar
+ARG jar_file=target/failed-message-store-poller.jar
 
 # add application jar file to container
-COPY ${jar_file} outbox-poller.jar
+COPY ${jar_file} failed-message-store-poller.jar
 
 # run the jar file
-ENTRYPOINT ["java", "-jar", "-DserviceUrl=35.226.189.52:80","-Dlimit=10","outbox-poller.jar" ]
+ENTRYPOINT ["java", "-jar", "-DserviceUrl=35.226.189.52:80","-Dlimit=10","failed-message-store-poller.jar" ]
