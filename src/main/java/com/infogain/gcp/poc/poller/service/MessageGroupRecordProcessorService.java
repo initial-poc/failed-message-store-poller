@@ -1,20 +1,20 @@
 package com.infogain.gcp.poc.poller.service;
 
-import com.google.cloud.Timestamp;
-import com.google.cloud.spanner.Statement;
-import com.google.common.base.Stopwatch;
-import com.infogain.gcp.poc.poller.entity.GroupMessageStoreEntity;
-import com.infogain.gcp.poc.poller.repository.SpannerGroupMessageStoreRepository;
-import com.infogain.gcp.poc.util.RecordStatus;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import java.net.InetAddress;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gcp.data.spanner.core.SpannerOperations;
 import org.springframework.stereotype.Service;
 
-import java.net.InetAddress;
-import java.util.List;
+import com.google.cloud.spanner.Statement;
+import com.google.common.base.Stopwatch;
+import com.infogain.gcp.poc.poller.entity.GroupMessageStoreEntity;
+import com.infogain.gcp.poc.poller.repository.SpannerGroupMessageStoreRepository;
+
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -22,7 +22,7 @@ public class MessageGroupRecordProcessorService {
 
     private final SpannerGroupMessageStoreRepository groupMessageStoreRepository;
     private final String ip;
-
+private final GroupMessageService groupMessageService;
     @Value(value = "${limit}")
     private int recordLimit=10;
 
@@ -33,9 +33,10 @@ public class MessageGroupRecordProcessorService {
 
     @Autowired
     @SneakyThrows
-    public MessageGroupRecordProcessorService(SpannerGroupMessageStoreRepository spannerGroupMessageStoreRepository) {
+    public MessageGroupRecordProcessorService(SpannerGroupMessageStoreRepository spannerGroupMessageStoreRepository,GroupMessageService groupMessageService) {
         this.groupMessageStoreRepository = spannerGroupMessageStoreRepository;
         ip = InetAddress.getLocalHost().getHostAddress();
+        this.groupMessageService=groupMessageService;
     }
 
    public void processFailedRecords() {
@@ -43,21 +44,23 @@ public class MessageGroupRecordProcessorService {
     }
 
     public void processStuckRecords() {
-        doProcessStuckRecords(getRecord(GRP_MSG_STORE_STUCK_RECORD_SQL));
+    	doProcessFailedRecords(getRecord(GRP_MSG_STORE_STUCK_RECORD_SQL));
     }
 
-    public void doProcessFailedRecords(List<GroupMessageStoreEntity> recordToProcess) {
+    
+    
+     
+    
+    
+    
+    
+    private void doProcessFailedRecords(List<GroupMessageStoreEntity> recordToProcess) {
         log.info("total record -> {} to process by application->  {}", recordToProcess.size(), ip);
         log.info("RECORD {}", recordToProcess);
-        recordToProcess.stream().forEach(x->updateRecord(x, RecordStatus.IN_PROGESS.getStatusCode()));
+        recordToProcess.stream().forEach( groupMessageService::processRecord);
     }
 
-    public void doProcessStuckRecords(List<GroupMessageStoreEntity> recordToProcess) {
-        log.info("total record -> {} to process by application->  {}", recordToProcess.size(), ip);
-        log.info("RECORD {}", recordToProcess);
-        recordToProcess.stream().forEach(x->updateRecord(x, RecordStatus.FAILED.getStatusCode()));
-    }
-
+    
     private List<GroupMessageStoreEntity> getRecord(String sql) {
         log.info("Getting record to process by application->  {}", ip);
         Stopwatch stopWatch = Stopwatch.createStarted();
@@ -69,14 +72,6 @@ public class MessageGroupRecordProcessorService {
         return recordToProcess;
     }
 
-    private void updateRecord(GroupMessageStoreEntity entity, int status) {
-        if(status==RecordStatus.FAILED.getStatusCode()) {
-            entity.setRetry_count(entity.getRetry_count()+1);
-        }
-        entity.setStatus(status);
-        entity.setUpdated(Timestamp.now());
-        log.info("Going to update status for the record {}", entity);
-        groupMessageStoreRepository.save(entity);
-    }
+    
 
 }
