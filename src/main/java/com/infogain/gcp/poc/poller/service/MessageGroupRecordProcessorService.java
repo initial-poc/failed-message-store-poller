@@ -27,7 +27,7 @@ public class MessageGroupRecordProcessorService {
     private int recordLimit=10;
 
     private static final String GRP_MSG_STORE_FAILED_SQL =
-            "SELECT * FROM group_message_store WHERE STATUS =3 and retry_count<=3";
+            "SELECT * FROM group_message_store WHERE STATUS =4 and retry_count<=3";
     private static final String GRP_MSG_STORE_STUCK_RECORD_SQL =
             "SELECT * FROM group_message_store WHERE STATUS in(1,2) and TIMESTAMP_DIFF(CURRENT_TIMESTAMP,updated, MINUTE)>5";
 
