@@ -47,20 +47,12 @@ private final GroupMessageService groupMessageService;
     	doProcessFailedRecords(getRecord(GRP_MSG_STORE_STUCK_RECORD_SQL));
     }
 
-    
-    
-     
-    
-    
-    
-    
     private void doProcessFailedRecords(List<GroupMessageStoreEntity> recordToProcess) {
         log.info("total record -> {} to process by application->  {}", recordToProcess.size(), ip);
         log.info("RECORD {}", recordToProcess);
         recordToProcess.stream().forEach( groupMessageService::processRecord);
     }
 
-    
     private List<GroupMessageStoreEntity> getRecord(String sql) {
         log.info("Getting record to process by application->  {}", ip);
         Stopwatch stopWatch = Stopwatch.createStarted();

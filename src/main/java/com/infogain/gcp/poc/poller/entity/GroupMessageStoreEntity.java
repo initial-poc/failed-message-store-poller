@@ -43,7 +43,10 @@ public class GroupMessageStoreEntity implements Comparable<GroupMessageStoreEnti
     @SneakyThrows
     public GroupMessageStoreModel buildModel() {
         GroupMessageStoreModel pnrModel = new GroupMessageStoreModel();
-        BeanUtils.copyProperties(pnrModel, this);
+        pnrModel.setPnrid(this.pnrid);
+        pnrModel.setMessageseq(this.messageseq);
+        pnrModel.setTimestamp(this.timestamp.toString());
+        pnrModel.setPayload(this.payload);
         return pnrModel;
     }
 
